@@ -54,11 +54,17 @@ public class UserRepository : IUserRepository
         query = query.Where(user => user.UserName != userParams.CurrentUsername);
         query = query.Where(user => user.Gender == userParams.Gender);
 
-        var minDob = DateOnly.FromDateTime(DateTime.Today.AddYears(-userParams.MaxAge- 1));
+        var minDob = DateOnly.FromDateTime(DateTime.Today.AddYears(-userParams.MaxAge - 1));
         var maxDob = DateOnly.FromDateTime(DateTime.Today.AddYears(-userParams.MinAge));
 
         query = query.Where(user => user.DateOfBirth >= minDob && user.DateOfBirth <= maxDob);
-        
+
+        query = userParams.OrderBy switch
+        {
+            "created" => query.OrderByDescending(user => user.Created),
+            _ => query.OrderByDescending(user => user.LastActive)
+        };
+
         return await PagedList<MemberDto>.CreateAsync(
             query.AsNoTracking().ProjectTo<MemberDto>(_mapper.ConfigurationProvider), 
             userParams.PageNumber, 
