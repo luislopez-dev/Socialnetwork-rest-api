@@ -47,12 +47,17 @@ public class UserRepository : IUserRepository
             .Include(user => user.Photos)
             .SingleOrDefaultAsync(user => user.UserName == username);
     }
-    
+
     public async Task<PagedList<MemberDto>> GetMembersAsync(UserParams userParams)
     {
         var query = _context.Users.AsQueryable();
         query = query.Where(user => user.UserName != userParams.CurrentUsername);
         query = query.Where(user => user.Gender == userParams.Gender);
+
+        var minDob = DateOnly.FromDateTime(DateTime.Today.AddYears(-userParams.MaxAge- 1));
+        var maxDob = DateOnly.FromDateTime(DateTime.Today.AddYears(-userParams.MinAge));
+
+        query = query.Where(user => user.DateOfBirth >= minDob && user.DateOfBirth <= maxDob);
         
         return await PagedList<MemberDto>.CreateAsync(
             query.AsNoTracking().ProjectTo<MemberDto>(_mapper.ConfigurationProvider), 
