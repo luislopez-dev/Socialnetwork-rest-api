@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using datingApp.Data;
 using datingApp.DTOs;
 using datingApp.Entities;
 using datingApp.Extensions;
@@ -16,5 +17,9 @@ public class AutoMapperProfiles : Profile
         CreateMap<Photo, PhotoDto>();
         CreateMap<MemberUpdateDto, AppUser>();
         CreateMap<RegisterDto, AppUser>();
+        CreateMap<Message, MessageDto>()
+            .ForMember(dto => dto.SenderPhotoUrl,
+                options => options.MapFrom(s => s.Sender.Photos
+                    .FirstOrDefault(x => x.IsMain).Url));
     }
 }
