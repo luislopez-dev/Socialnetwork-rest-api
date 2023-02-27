@@ -1,9 +1,12 @@
 ﻿using datingApp.Entities;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace datingApp.Data;
-public class DataContext : DbContext
+public class DataContext : IdentityDbContext<AppUser, AppRole, int, IdentityUserClaim<int>, 
+AppUserRole, IdentityUserLogin<int>, IdentityRoleClaim<int>, IdentityUserToken<int>>
 {
     public DataContext(DbContextOptions options) : base(options)
     {
@@ -14,13 +17,24 @@ public class DataContext : DbContext
             .HaveConversion<DateOnlyConverter>()
             .HaveColumnType("date");
     }
-    public DbSet<AppUser> Users { get; set; }
     public DbSet<UserLike> Likes { get; set; }
     public DbSet<Message> Messages { get; set; }
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
 
+        builder.Entity<AppUser>()
+            .HasMany(user => user.UserRoles)
+            .WithOne(user => user.User)
+            .HasForeignKey(user => user.UserId)
+            .IsRequired();
+        
+        builder.Entity<AppRole>()
+            .HasMany(user => user.UserRoles)
+            .WithOne(user => user.Role)
+            .HasForeignKey(user => user.RoleId)
+            .IsRequired();
+        
         builder.Entity<UserLike>()
         .HasKey(key => new { key.SourseUserId, key.TargetUserId});
 

@@ -31,16 +31,7 @@ public class AccountController : BaseApiController
         {
             return Unauthorized("Invalid username");
         }
-        using var hmac = new HMACSHA512(user.PasswordSalt);
-        var computedHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(loginDto.Password));
-        for (int i = 0; i < computedHash.Length; i++)
-        {
-            if (computedHash[i] != user.PasswordHash[i])
-            {
-                return Unauthorized("Invalid Password");
-            }
-        }
-
+        
         return new UserDto
         {
             Username = user.UserName,
@@ -55,7 +46,6 @@ public class AccountController : BaseApiController
         {
             return BadRequest("Username is taken");
         }
-        using var hmac = new HMACSHA512();
 
         // Temporary workaround while app is updated to .net core v7
        //   registerDto.DateOfBirth = new DateOnly(1988,06,22);
@@ -63,9 +53,7 @@ public class AccountController : BaseApiController
         var user = _mapper.Map<AppUser>(registerDto);
 
         user.UserName = registerDto.Username.ToLower();
-        user.PasswordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(registerDto.Password));
-        user.PasswordSalt = hmac.Key;
-        
+
         _dataContext.Users.Add(user);
         await _dataContext.SaveChangesAsync();
 
