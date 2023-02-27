@@ -1,15 +1,31 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using datingApp.Entities;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace datingApp.Controllers;
 
 public class AdminController : BaseApiController
 {
+    private readonly UserManager<AppUser> _userManager;
+
+    public AdminController(UserManager<AppUser> userManager)
+    {
+        _userManager = userManager;
+    }
+
     [Authorize(Policy = "RequiredAdminRole")]
     [HttpGet("users-with-roles")]
-    public ActionResult GerUserWithRoles()
+    public async Task<ActionResult> GerUserWithRoles()
     {
-        return Ok("Only admins can see this");
+        var users = await _userManager.Users.OrderBy(user => user.UserName).Select(user => new
+        {
+            user.Id,
+            UserName = user.UserName,
+            Roles = user.UserRoles.Select(role => role.Role.Name).ToList(),
+        }).ToListAsync();
+        return Ok(users);
     }
 
     [Authorize(Policy = "ModeratePhotoRole")]
