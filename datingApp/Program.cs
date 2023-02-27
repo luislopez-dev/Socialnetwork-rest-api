@@ -5,8 +5,10 @@ using datingApp.Extensions;
 using datingApp.Interfaces;
 using datingApp.Middleware;
 using datingApp.Services;
+using datingApp.SignalR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
@@ -34,9 +36,17 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 */
 // app.UseAuthorization();
+app.UseCors(builder => builder
+    .AllowAnyHeader()
+    .AllowAnyMethod()
+    .AllowCredentials()
+    .WithOrigins("*")
+);
+
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+app.MapHub<PresenceHub>("hubs/presence");
 
 using var scope = app.Services.CreateScope();
 var services = scope.ServiceProvider;
