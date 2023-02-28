@@ -54,11 +54,8 @@ public class MessageRepository : IMessageRepository
 
     public async Task<IEnumerable<MessageDto>> GetMessageThread(string currentUserName, string recipientUserName)
     {
-        var messages = await _context.Messages
-            .Include(u => u.Sender)
-            .ThenInclude(p => p.Photos)
-            .Include(u => u.Recipient)
-            .ThenInclude(p => p.Photos)
+        var query =  _context.Messages
+
             .Where(
                 m => m.RecipientUsername == currentUserName && m.RecipientDeleted == false &&
                      m.SenderUsername == recipientUserName ||
@@ -66,9 +63,9 @@ public class MessageRepository : IMessageRepository
                      m.SenderUsername == currentUserName
             )
             .OrderByDescending(m => m.MessageSent)
-            .ToListAsync();
+            .AsQueryable();
         
-        var unreadMessages = messages.Where(m => 
+        var unreadMessages = query.Where(m => 
             m.DateRead == null && m.RecipientUsername == currentUserName).ToList();
         
         if (unreadMessages.Any())
@@ -78,6 +75,6 @@ public class MessageRepository : IMessageRepository
                 message.DateRead = DateTime.UtcNow;
             }
         }
-        return _mapper.Map<IEnumerable<MessageDto>>(messages);
+        return await query.ProjectTo<MessageDto>(_mapper.ConfigurationProvider).ToListAsync();
     }
 }
