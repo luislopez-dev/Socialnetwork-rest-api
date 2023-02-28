@@ -18,15 +18,16 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers().AddNewtonsoftJson();
 builder.Services.AddApplicationServices(builder.Configuration);
 builder.Services.AddIdentityServices(builder.Configuration);
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-/*
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-*/
+
 var app = builder.Build();
 app.UseMiddleware<ExceptionMiddleware>();
+
 // Configure the HTTP request pipeline.
-/*
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -34,7 +35,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-*/
+
 // app.UseAuthorization();
 app.UseCors(builder => builder
     .AllowAnyHeader()
