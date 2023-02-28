@@ -1,1 +1,1 @@
-![DatingApp Diagram](https://user-images.githubusercontent.com/48783255/221891840-66fbd625-87f0-42b6-aafd-1fe6676f9380.png)
+![Dating app diagram ](https://user-images.githubusercontent.com/48783255/221894169-2dd9e645-23a0-4dc7-b99f-2dee549ce584.png)
