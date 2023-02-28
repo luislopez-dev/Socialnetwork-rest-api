@@ -27,12 +27,12 @@ public class UsersController : BaseApiController
     [HttpGet]
     public async Task<ActionResult<PagedList<MemberDto>>> GetUsers([FromQuery] UserParams userParams)
     {
-        var currentUser = await _uoWork.UserRepository.GetUserByUserNameAsync(User.GetUsername());
-        userParams.CurrentUsername = currentUser.UserName;
+        var gender = await _uoWork.UserRepository.GetUserGender(User.GetUsername());
+        userParams.CurrentUsername = User.GetUsername();
     
         if (string.IsNullOrEmpty(userParams.Gender))
         {
-            userParams.Gender = currentUser.Gender == "male" ? "female" : "male";
+            userParams.Gender = gender == "male" ? "female" : "male";
         }
         
         var users = await _uoWork.UserRepository.GetMembersAsync(userParams);
