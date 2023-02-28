@@ -12,13 +12,13 @@ namespace datingApp.Controllers;
 [Authorize]
 public class UsersController : BaseApiController
 {
-    private readonly IUserRepository _userRepository;
+    private readonly IUnitOfWork _uoWork;
     private readonly IMapper _mapper;
     private readonly IPhotoService _photoService;
 
-    public UsersController(IUserRepository userRepository, IMapper mapper, IPhotoService photoService)
+    public UsersController(IMapper mapper, IPhotoService photoService, IUnitOfWork uoWork)
     {
-        _userRepository = userRepository;
+        _uoWork = uoWork;
         _mapper = mapper;
         _photoService = photoService;
     }
@@ -27,7 +27,7 @@ public class UsersController : BaseApiController
     [HttpGet]
     public async Task<ActionResult<PagedList<MemberDto>>> GetUsers([FromQuery] UserParams userParams)
     {
-        var currentUser = await _userRepository.GetUserByUserNameAsync(User.GetUsername());
+        var currentUser = await _uoWork.UserRepository.GetUserByUserNameAsync(User.GetUsername());
         userParams.CurrentUsername = currentUser.UserName;
     
         if (string.IsNullOrEmpty(userParams.Gender))
@@ -35,7 +35,7 @@ public class UsersController : BaseApiController
             userParams.Gender = currentUser.Gender == "male" ? "female" : "male";
         }
         
-        var users = await _userRepository.GetMembersAsync(userParams);
+        var users = await _uoWork.UserRepository.GetMembersAsync(userParams);
         Response.AddPaginationHeader(new PaginationHeader(
             users.CurrentPage, users.PageSize, 
             users.TotalCount, users.TotalPages));
@@ -46,19 +46,19 @@ public class UsersController : BaseApiController
     [HttpGet("{username}")]
     public async Task<ActionResult<MemberDto>> GetUser(string username)
     {
-        return await _userRepository.GetMemberAsync(username);
+        return await _uoWork.UserRepository.GetMemberAsync(username);
     }
     
     [HttpPut]
     public async Task<ActionResult> UpdateUser(MemberUpdateDto memberUpdateDto)
     {
-        var user = await _userRepository.GetUserByUserNameAsync(User.GetUsername());
+        var user = await _uoWork.UserRepository.GetUserByUserNameAsync(User.GetUsername());
         if (user == null)
         {
             return NotFound();
         }
         _mapper.Map(memberUpdateDto, user);
-        if (await _userRepository.SaveAllAsync())
+        if (await _uoWork.Complete())
         {
             return NoContent();
         }
@@ -68,7 +68,7 @@ public class UsersController : BaseApiController
     [HttpPost("add-photo")]
     public async Task<ActionResult<PhotoDto>> AddPhoto(IFormFile file)
     {
-        var user = await _userRepository.GetUserByUserNameAsync(User.GetUsername());
+        var user = await _uoWork.UserRepository.GetUserByUserNameAsync(User.GetUsername());
         if (user == null) return NotFound();
 
         var result = await _photoService.AddPhotoAsync(file);
@@ -85,7 +85,7 @@ public class UsersController : BaseApiController
         }
         
         user.Photos.Add(photo);
-        if (await _userRepository.SaveAllAsync())
+        if (await _uoWork.Complete())
         {
             return CreatedAtAction(nameof(GetUser), 
                 new {username = user.UserName}, _mapper.Map<PhotoDto>(photo));
@@ -96,7 +96,7 @@ public class UsersController : BaseApiController
     [HttpPut("set-main-photo/{photoId}")]
     public async Task<ActionResult> SetMainPhoto(int photoId)
     {
-        var user = await _userRepository.GetUserByUserNameAsync(User.GetUsername());
+        var user = await _uoWork.UserRepository.GetUserByUserNameAsync(User.GetUsername());
         
         if (user == null) return NotFound();
         
@@ -112,7 +112,7 @@ public class UsersController : BaseApiController
 
         photo.IsMain = true;
 
-        if (await _userRepository.SaveAllAsync()) return NoContent();
+        if (await _uoWork.Complete()) return NoContent();
 
         return BadRequest("Problem setting the main photo");
     }
@@ -120,7 +120,7 @@ public class UsersController : BaseApiController
     [HttpDelete("delete-photo/{photoId}")]
     public async Task<ActionResult> DeletePhoto(int photoId)
     {
-        var user = await _userRepository.GetUserByUserNameAsync(User.GetUsername());
+        var user = await _uoWork.UserRepository.GetUserByUserNameAsync(User.GetUsername());
         
         var photo = user.Photos.FirstOrDefault(photo => photo.Id == photoId);
         
@@ -134,13 +134,13 @@ public class UsersController : BaseApiController
             if (result.Error != null) return BadRequest(result.Error.Message);
         }
         user.Photos.Remove(photo);
-        if (await _userRepository.SaveAllAsync()) return Ok();
+        if (await _uoWork.Complete()) return Ok();
         return BadRequest("Problem uploading your photo");
     }
     
     [HttpPost("test")]
     public async Task<AppUser> GetPhotos()
     {
-        return await _userRepository.GetUserByUserNameAsync(User.GetUsername());
+        return await _uoWork.UserRepository.GetUserByUserNameAsync(User.GetUsername());
     }
 }
