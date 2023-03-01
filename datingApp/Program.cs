@@ -41,7 +41,7 @@ app.UseCors(builder => builder
     .AllowAnyHeader()
     .AllowAnyMethod()
     .AllowCredentials()
-    .WithOrigins("*")
+    .WithOrigins("http://localhost:1400")
 );
 
 app.UseAuthentication();
@@ -66,4 +66,4 @@ catch (Exception e)
     logger.LogError(e, "An error occurred during migration");
 }
 
-app.Run();
+await app.RunAsync();
