@@ -3,4 +3,5 @@ obj/
 /packages/
 riderModule.iml
 /_ReSharper.Caches/
-datingApp/appsettings.json
+datingApp/appsettings.json 
+"local tools"/

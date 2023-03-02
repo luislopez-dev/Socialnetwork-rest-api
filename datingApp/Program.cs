@@ -1,3 +1,5 @@
+// © Luis René López Hernández (https://github.com/luislopez-dev)
+
 using System.Text;
 using datingApp.Data;
 using datingApp.Entities;
