@@ -1,4 +1,4 @@
-//© 2023 Luis René López Hernández (https://github.com/luislopez-dev). All rights reserved
+// © 2023 Luis René López Hernández (https://github.com/luislopez-dev). All rights reserved
 using System.Text;
 using datingApp.Data;
 using datingApp.Entities;
