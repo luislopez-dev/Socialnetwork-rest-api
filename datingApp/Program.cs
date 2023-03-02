@@ -13,12 +13,17 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
+//...
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.ListenAnyIP(5000); // to listen for incoming http connection on port 5000
+//    options.ListenAnyIP(7000, configure => configure.UseHttps()); // to listen for incoming https connection on port 7001
+});
 
 // Add services to the container.
 builder.Services.AddControllers().AddNewtonsoftJson();
 builder.Services.AddApplicationServices(builder.Configuration);
 builder.Services.AddIdentityServices(builder.Configuration);
-
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 
 builder.Services.AddEndpointsApiExplorer();
@@ -41,7 +46,7 @@ app.UseCors(builder => builder
     .AllowAnyHeader()
     .AllowAnyMethod()
     .AllowCredentials()
-    .WithOrigins("http://localhost:1400")
+    .WithOrigins("http://localhost:1400")    
 );
 
 app.UseAuthentication();
