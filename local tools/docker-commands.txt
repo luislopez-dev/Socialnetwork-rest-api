@@ -1,2 +1,0 @@
-1. docker build -t luislopezdev/socialnetwork .
-2. docker run --rm -it -p 80:5000 luislopezdev/socialnetwork:latest
